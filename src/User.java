@@ -8,7 +8,70 @@
  * implemented last time. You can always reference my Github repository
  * for inspiration (https://github.com/rwilson-ucvts/java-sample-atm).
  */
+import java.util.Date;
+import java.util.Scanner;
 
 public class User {
+	private String fname;
+	private String lname;
+	private int pin;
+	private Date dob;
+	private long phone;
+	private String address;
+	private String city;
+	private String state;
+	private int postal;
 	
+	User (String fname, String lname, int pin, Date DOB, long phone, String address, String city, String state, int postal) {
+		this.fname = fname;
+		this.lname = lname;
+		this.pin = pin;
+		this.dob = dob;
+		this.phone = phone;
+		this.address = address;
+		this.city = city;
+		this.state = state;
+		this.postal = postal;
+	}
+	
+	public String getfname(String fname) {
+		return fname;
+	}
+	public String getlname(String lname) {
+		return lname;
+	}
+	public int getpin(int pin) {
+		return pin;
+	}
+	public Date getdob(Date dob) {
+		return dob;
+	}
+	public long getphone(long phone) {
+		return phone;
+	}
+	public String getaddress(String address) {
+		return address;
+	}
+	public String getcity(String city) {
+		return city;
+	}
+	public String getstate(String state) {
+		return state;
+	}
+	public int getpostal(int postal) {
+		return postal;
+	}
+	
+	public void setaddress(String address) {
+		this.address = address;
+	}
+	public void setcity(String city) {
+		this.city = city;
+	}
+	public void setstate(String state) {
+		this.state = state;
+	}
+	public void setpostal(int postal) {
+		this.postal = postal;
+	}
 }
