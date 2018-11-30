@@ -15,14 +15,14 @@ public class User {
 	private String fname;
 	private String lname;
 	private int pin;
-	private Date dob;
+	private String dob;
 	private long phone;
 	private String address;
 	private String city;
 	private String state;
 	private int postal;
 	
-	User (String fname, String lname, int pin, Date DOB, long phone, String address, String city, String state, int postal) {
+	User (int pin, String fname, String lname, String dob, long phone, String address, String city, String state, int postal) {
 		this.fname = fname;
 		this.lname = lname;
 		this.pin = pin;
@@ -43,7 +43,7 @@ public class User {
 	public int getpin(int pin) {
 		return pin;
 	}
-	public Date getdob(Date dob) {
+	public String getdob(String dob) {
 		return dob;
 	}
 	public long getphone(long phone) {

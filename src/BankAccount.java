@@ -9,15 +9,14 @@
  */
 
 public class BankAccount {
-	private static long accountnumber = 100000001L;
 	
 	private double balance;
 	private long accountNum;
 	private User user;
 	
-	BankAccount (double balance, User user) {
+	BankAccount (long accountNum, double balance, User user) {
 		this.balance = balance;
-		this.accountNum = BankAccount.accountnumber++;
+		this.accountNum = accountNum;
 		this.user = user;
 	}
 	
@@ -25,15 +24,16 @@ public class BankAccount {
 		return balance;
 	}
 	
-	public int getaccountnumber(int accountnumber) {
-		return accountnumber;
-	}
-	
-	public User getaccountNum(User accountNum) {
+	public long getaccountnumber(long accountNum) {
 		return accountNum;
 	}
 	
-	public int deposit(double amount) {
+	public User getuser(User user) {
+		return user;
+	}
+	
+	
+	public double deposit(double amount) {
 		if (amount <= 0) {
 			return 0;
 		} else {
@@ -43,13 +43,25 @@ public class BankAccount {
 		}
 	}
 	
-	public int withdraw(double amount) {
+	public double withdraw(double amount) {
 		if (amount > balance) {
 			return 0;
 		} else if (amount <= 0) {
 			return 1;
 		} else {
 			balance = balance - amount;
+			
+			return 2;
+		}
+	}
+	public double transfer(BankAccount receiver, double amount) {
+		if (amount > balance) {
+			return 0;
+		} else if (amount <= 0) {
+			return 1;
+		} else {
+			this.balance -= amount;
+			receiver.balance = balance + amount;
 			
 			return 2;
 		}
