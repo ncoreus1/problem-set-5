@@ -8,16 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-
 public class Database {
 	
 	private String path;
@@ -133,7 +123,6 @@ public class Database {
 		
 		return max;
 	}
-<<<<<<< HEAD
 }
 	
 	/*public BankAccount getAccount(long accountNum) throws Exception {
@@ -166,6 +155,3 @@ public class Database {
 		return account;
 	}
 }*/
-=======
-}
->>>>>>> ae9052c2ed0f9ab87652339e455a13fc0b514e21
