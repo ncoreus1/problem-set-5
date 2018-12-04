@@ -12,24 +12,24 @@ public class BankAccount {
 	
 	private double balance;
 	private long accountNum;
-	private User user;
+	private User account;
 	
 	BankAccount (long accountNum, double balance, User user) {
 		this.balance = balance;
 		this.accountNum = accountNum;
-		this.user = user;
+		this.account = account;
 	}
 	
 	public double getbalance(double balance) {
 		return balance;
 	}
 	
-	public long getaccountnumber(long accountNum) {
+	public long getAccountNumber(long accountNum) {
 		return accountNum;
 	}
 	
-	public User getuser(User user) {
-		return user;
+	public User getuser(User account) {
+		return account;
 	}
 	
 	
@@ -66,4 +66,5 @@ public class BankAccount {
 			return 2;
 		}
 	}
+	public String 
 }
