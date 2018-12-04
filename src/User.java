@@ -8,8 +8,6 @@
  * implemented last time. You can always reference my Github repository
  * for inspiration (https://github.com/rwilson-ucvts/java-sample-atm).
  */
-import java.util.Date;
-import java.util.Scanner;
 
 public class User {
 	private String fname;
