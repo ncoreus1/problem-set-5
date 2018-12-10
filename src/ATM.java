@@ -10,43 +10,285 @@
  * for inspiration (https://github.com/rwilson-ucvts/java-sample-atm).
  */
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.Scanner;
 
 public class ATM {
-	public BankAccount getAccount(long accountNum) throws Exception {
-		BankAccount account = null;
+	private Database database;
+	private Scanner in;
+	private BankAccount currentAccount = null;
+	private BankAccount destination = null;
+
+	public ATM(Database database) {
+		this.database = database;
+	}
+	
+	public void run() throws Exception {
+		System.out.print("Welcome to APCSA Enhanced ATM, the ATM of choice for the UCVTS community.\r\n" + 
+				"To begin, create a new account or access an existing one.");
 		
-		try(BufferedReader br = new BufferedReader(new FileReader("accounts-db.txt"))) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				long acctNum = Long.parseLong(line.substring(0,9));
+		menu();
+	}
+	
+	public void menu() throws Exception {
+		in = new Scanner(System.in);
+		System.out.print("\r\n" + 
+				"   [1] Open Account\r\n" + 
+				"   [2] Login\r\n" + 
+				"   [3] Quit\r\n" + 
+				"\r\n" + 
+				"Make a selection: ");
+		switch(in.next().charAt(0)) {
+		case '1': 
+			System.out.println("Alright, so you're opening a new account. Enter your information");
+			this.createAccount();
+			screen();
+			break;
+		case '2':
+			try {
+				System.out.print("Please enter your account credentials.\r\n" + 
+						"\r\n" + 
+						"Account # : ");
+				long account = in.nextLong();
+				this.currentAccount = this.database.getAccount(account);
+				if(this.currentAccount == null) {
+					System.out.print("Invalid Account #");
+					menu();
+				}
+				System.out.print("    PIN # : ");
+				int pin = in.nextInt();
+				if(this.currentAccount.getUser().getPIN() == pin) {
+					screen();
+				} else {
+					System.out.print("Invalid PIN");
+					menu();
+				}
+			} catch (InvalidParameterException e) {
+				System.out.println(e.getMessage());
+			} catch (InputMismatchException e) {
+				System.out.println("Invalid");
+			}
+			
+			break;
+		case '3': 
+			System.out.print("Powering Off.");
+			break;
+			
+		default:
+			System.out.println("Invalid");
+			menu();
+			break;
+			
+		}
+	}
+	
+	public void screen() throws Exception {
+		System.out.print("\nHi, " + this.currentAccount.getUser().getfirstName() + " " + this.currentAccount.getUser().getlastName() + "! What can I help you with?\r\n" + 
+				"\r\n" + 
+				"   [1] Deposit\r\n" + 
+				"   [2] Withdraw\r\n" + 
+				"   [3] Transfer\r\n" + 
+				"   [4] View Balance\r\n" + 
+				"   [5] View Personal Information\r\n" + 
+				"   [6] Update Personal Information\r\n" + 
+				"   [7] Close Account\r\n" + 
+				"   [8] Logout\r\n" + 
+				"\r\n" + 
+				"Make a selection:");
+		
+		switch (in.next().charAt(0)) {
+		case '1':
+			System.out.println("How much would you like to deposit?");
+			try {
+				double deposit = in.nextDouble();
 				
-				if (acctNum == accountNum && line.charAt(148) == 'Y') {
-					int pin = Integer.parseInt(line.substring(9, 13));
-					double balance = Double.parseDouble(line.substring(13, 28));
-					String lname = line.substring(28, 48).trim();
-					String fname = line.substring(48, 63).trim();
-					String dob = line.substring(63, 71);
-					long phone = Long.parseLong(line.substring(71, 81));
-					String address = line.substring(81, 111).trim();
-					String city = line.substring(111, 141).trim();
-					String state = line.substring(141, 143);
-					int postal = Integer.parseInt(line.substring(143, 148));
+				if(this.currentAccount.deposit(deposit) == 0) {
+					System.out.print("\nAmount must be greater than $0.00.");
+				} else {
+					System.out.print("\nDeposited $" + deposit + ". Updated balance is $" + this.currentAccount.getBalance() + ".");
+				}
+			} catch (InvalidParameterException e) {
+				System.out.println(e.getMessage());
+			} catch (InputMismatchException e) {
+				System.out.println("Invalid amount");
+			}
+			screen();
+			break;
+		case '2':
+			System.out.println("How much would you like to withdraw?");
+			try {
+				if (this.currentAccount.getBalance() == 0) {
+					System.out.print("\nYou don't have any money to withdraw. Try depositing money first.");
+				}
+				else {
+					System.out.print("\nAlright, so we're withdrawing some money.\r\n" + 
+							"\r\n" + 
+							"Enter Amount: ");
 					
-					account = new BankAccount(acctNum, balance, new User(pin, fname, lname, dob, phone, address, city, state, postal));
-					break;
+					double withdraw = in.nextDouble();
+					
+					if(this.currentAccount.withdraw(withdraw) == 2) {
+						System.out.print("\nWithdrew $" + withdraw + ". Updated balance is $" + this.currentAccount.getBalance() + ".");
+					} 
+					else if(this.currentAccount.withdraw(withdraw) == 1) {
+						System.out.print("\nAmount must be greater than $0.00.");
+					} 
+					else {
+						System.out.print("\nInsufficient funds.");
+					}
+				}
+				
+			} catch (InvalidParameterException e) {
+				System.out.println(e.getMessage());
+			} catch (InputMismatchException e) {
+				System.out.println("Invalid amount");
+			}
+			screen();
+			break;
+		case '3':
+			if (this.currentAccount.getBalance() == 0) {
+				System.out.print("\nYou don't have any money to withdraw. Try depositing money first.");
+				screen();
+			} else {
+				System.out.print("Enter Destination Account #: ");
+				try {
+					Long destinationAmt = in.nextLong();
+					this.destination = this.database.getAccount(destinationAmt);
+					System.out.print("Enter Amount: ");
+					double amount = in.nextDouble();
+					if(this.destination == null) {
+						System.out.print("Account Not Found");
+						screen();
+					} else {
+						this.currentAccount.withdraw(amount);
+						this.destination.setBalance(this.destination.getBalance() + amount);
+						this.database.updateAccount(this.currentAccount, this.destination);
+						System.out.print("Transferred " + "$" + amount + " to " + this.destination.getAccountNumber() + ". Your updated balance is $" + String.format("%,10.2f", currentAccount.getBalance()).trim());
+						
+					}
+				} catch (InvalidParameterException e) {
+					System.out.println(e.getMessage()); 
 				}
 			}
+			
+			break;
+		case '4':
+			this.database.updateAccount(this.currentAccount, null);
+			System.out.println("Current balance is: $" + String.format("%,10.2f", currentAccount.getBalance()).trim());
+			screen();
+			break;
+		case '5':
+			System.out.println("Account Number: " + this.currentAccount.getAccountNumber());
+			System.out.println("Account Holder: " + this.currentAccount.getUser().getfirstName() + " " + this.currentAccount.getUser().getlastName());
+			System.out.println("Address: " + this.currentAccount.getUser().getstreetAddress() + " " + this.currentAccount.getUser().getCity() + ", " + this.currentAccount.getUser().getState() + " " + this.currentAccount.getUser().getpostalCode());
+			System.out.println("Date of Birth(YYYYMMDD): " + this.currentAccount.getUser().getDOB());
+			System.out.println("Telephone: " + this.currentAccount.getUser().getPhone());
+			screen();
+			break;
+		case '6':
+			//while (!this.currentAccount.getUser().updateInfo(in)) ;
+			System.out.println("Select the personal information you wish to update.\r\n" + 
+					"\r\n" + 
+					"   [1] PIN\r\n" + 
+					"   [2] Telephone\r\n" + 
+					"   [3] Address\r\n" + 
+					"\r\n" + 
+					"Make a selection: ");
+			
+			switch(in.next().charAt(0)) {
+			case '1':
+				System.out.print("Enter current PIN #: ");
+				int test = in.nextInt();
+				if(test == this.currentAccount.getUser().getPIN()) {
+					System.out.print("Enter New Pin: ");
+					int newpin = in.nextInt();
+					if (String.valueOf(newpin).length() == 4) {
+						System.out.print("Successfully changed PIN from " + this.currentAccount.getUser().getPIN() + " to " + newpin);
+						this.currentAccount.getUser().setPIN(newpin);
+						this.database.updateAccount(this.currentAccount, null);
+					} else {
+						System.out.print("PIN must be 4 digits");
+						screen();
+					}
+				} else {
+					System.out.print("Invalid PIN");
+					screen();
+				}
+				screen();
+				break;
+			case '2':
+				System.out.print("Enter new number: ");
+				long phone = in.nextLong();
+				if (String.valueOf(phone).length() == 10) {
+					System.out.print("Successfully changed phone number from " + this.currentAccount.getUser().getPhone() + " to " + phone);
+					this.currentAccount.getUser().setPhone(phone);
+					this.database.updateAccount(this.currentAccount, null);
+					screen();
+				} else {
+					System.out.print("Phone should be 10 digits");
+					screen();
+				}
+				break;
+			case '3':
+				System.out.print("Enter new street address : ");
+				in.nextLine();
+				String address = in.nextLine();
+				System.out.print("          Enter new city : ");
+				String city = in.nextLine();
+				System.out.print("       Enter new state(ex: NJ): ");
+				String state = in.nextLine();
+				if(String.valueOf(state).length() != 2) {
+					System.out.print("2 digits please");
+					screen();
+				}
+				System.out.print("   Enter new postal code : ");
+				String postalcode = in.nextLine();
+
+				System.out.print("Successfully changed address from " + this.currentAccount.getUser().getstreetAddress() + " " + this.currentAccount.getUser().getCity() + ", " + this.currentAccount.getUser().getState() + " " + this.currentAccount.getUser().getpostalCode() + " to " + address + " " +  city + ", " + state + " " + postalcode);
+				this.currentAccount.getUser().setstreetAddress(address);
+				this.currentAccount.getUser().setCity(city);
+				this.currentAccount.getUser().setState(state);
+				this.currentAccount.getUser().setpostalCode(postalcode);
+				screen();
+				break;
+			default: 
+				System.out.print("Invalid Option");
+				screen();
+			}
+			break;
+
+		case '7':
+			System.out.print("Aw, we're sorry to see you go... Are you sure?\r\n" + 
+					"\r\n" + 
+					"Confirm (Y/N):");
+			char confirm = in.next().charAt(0);
+			if(confirm == 'y' || confirm == 'Y') {
+				System.out.println("Closing account");
+				this.currentAccount.getUser().close();
+				this.database.updateAccount(this.currentAccount, null);
+				menu();
+			} else if (confirm == 'n' || confirm == 'N') {
+				screen();
+			}
+			this.database.updateAccount(this.currentAccount, null);
+			break;
+		case '8':
+			System.out.println("Logging out");
+			this.database.updateAccount(this.currentAccount, null);
+			this.currentAccount = null;
+			menu();
+			break;
+		default:
+			System.out.println("Invalid option");
+			screen();
+			break;
 		}
-	/*public ATM(BankAccount account) {
+	}
+	
+	private void createAccount() throws IOException {
+		this.currentAccount = new BankAccount(in);
+		database.updateAccount(this.currentAccount, null);
+	}
+}	/*public ATM(BankAccount account) {
 		this.account = account;
 		this.AccountHolder = AccountHolder;
 	}
@@ -142,4 +384,4 @@ public class ATM {
 		}	
 	}
 	 */
-}
+
